@@ -24,8 +24,9 @@
 16. Perspective.
 17. The Matrix.
 18. Gaining Intuition.
-19. More complex primitives.
-20. Connecting the dots.
-21. Transformations.
-22. In action.
-23. Questions?
+19. Matrix Operations.
+20. More complex primitives.
+21. Connecting the dots.
+22. Transformations.
+23. Putting this all together.
+24. Questions?
