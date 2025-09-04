@@ -25,15 +25,6 @@ vec3 vec3_scalar(vec3 a, double s) {
     };
 }
 
-vec3 vec3_unit(vec3 a) {
-    double length = sqrtf(a.x*a.x+a.y*a.y+a.z*a.z);
-    return (vec3){
-        .x = a.x/length,
-        .y = a.y/length,
-        .z = a.z/length,
-    };
-}
-
 typedef struct vec4 {
     double x, y, z, w;
 } vec4;
@@ -153,7 +144,6 @@ int main(void) {
             model.m33 = sinf(GetTime());
 
             MP = mat4x4_mul(model, projection);
-
 
             vec3 first = mat4x4_mul_vec3(MP, square[i]);
             vec3 next = mat4x4_mul_vec3(MP, square[(i+1)%4]);
