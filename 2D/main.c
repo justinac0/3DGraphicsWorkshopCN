@@ -47,7 +47,7 @@ void vec2_set(vec2 *v, double x, double y) {
 }
 
 int main(void) {
-    InitWindow(1280, 720, "1D Graphics");
+    InitWindow(1280, 720, "2D Graphics");
 
     vec2 position = {};
 
