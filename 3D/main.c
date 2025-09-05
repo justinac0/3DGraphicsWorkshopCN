@@ -52,26 +52,59 @@ mat4x4 mat4x4_fill(double v) {
 mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     mat4x4 result = mat4x4_fill(0);
 
-    for (int j = 0; j < 4; j++) {
-        for (int k = 0; k < 4; k++) {
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
             double sum = 0;
             for (int q = 0; q < 4; q++) {
-                sum += a.mm[j][q] * b.mm[q][k];
+                sum += a.mm[row][q] * b.mm[q][col];
             }
-            result.mm[j][k] = sum;
+            result.mm[row][col] = sum;
         }
     }
 
     return result;
 }
 
-vec3 mat4x4_mul_vec3(mat4x4 a, vec3 v) {
+mat4x4 mat4x4_rotate_z(double v) {
+    mat4x4 m = {
+        (vec4){cosf(v), -sinf(v), 0, 0},
+        (vec4){sinf(v),  cos(v),  0, 0},
+        (vec4){0,        0,       1, 0},
+        (vec4){0,        0,       0, 1},
+    };
+
+    return m;
+}
+
+mat4x4 mat4x4_rotate_y(double v) {
+    mat4x4 m = {
+        (vec4){cosf(v),  0, sinf(v),  0},
+        (vec4){0,        1, 0,        0},
+        (vec4){-sinf(v), 0, cosf(v),  0},
+        (vec4){0,        0, 0,        1},
+    };
+
+    return m;
+}
+
+mat4x4 mat4x4_rotate_x(double v) {
+    mat4x4 m = {
+        (vec4){1, 0,       0,        0},
+        (vec4){0, cosf(v), -sinf(v), 0},
+        (vec4){0, sinf(v), cosf(v),  0},
+        (vec4){0, 0,       0,        1},
+    };
+
+    return m;
+}
+
+vec3 vec3_mul_mat4x4(mat4x4 a, vec3 v) {
     vec3 result = {0, 0, 0};
 
-    result.x = a.m00 * v.x + a.m10 * v.y + a.m20 * v.y + a.m30;
-    result.y = a.m01 * v.x + a.m11 * v.y + a.m21 * v.y + a.m31;
-    result.z = a.m02 * v.x + a.m12 * v.y + a.m22 * v.y + a.m32;
-    double w = a.m03 * v.x + a.m13 * v.y + a.m23 * v.y + a.m33;
+    result.x = a.m00 * v.x + a.m10 * v.y + a.m20 * v.z + a.m30;
+    result.y = a.m01 * v.x + a.m11 * v.y + a.m21 * v.z + a.m31;
+    result.z = a.m02 * v.x + a.m12 * v.y + a.m22 * v.z + a.m32;
+    double w = a.m03 * v.x + a.m13 * v.y + a.m23 * v.z + a.m33;
 
     if (w != 0) {
         result.x /= w;
@@ -116,11 +149,19 @@ int main(void) {
         (vec4){0, 0, 1, 0},
         (vec4){0, 0, 0, 1},
     };
-    mat4x4 projection = {
-        (vec4){1, 0, 0, 0},
-        (vec4){0, 1, 0, 0},
-        (vec4){0, 0, 1, 0},
-        (vec4){0, 0, 1, 1},
+
+
+    // ref https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
+    double fov = 90.0;
+    double far = 100.0;
+    double near = 0.01;
+    double s = 1/(tanf((fov/2.0)*(PI/180.0)));
+
+    mat4x4 perspective = {
+        (vec4){s, 0, 0, 0},
+        (vec4){0, s, 0, 0},
+        (vec4){0, 0, -((far/(far-near))), -(far*near)/(far-near)},
+        (vec4){0, 0, -1, 1},
     };
 
     vec3 square[4] = {
@@ -132,8 +173,6 @@ int main(void) {
 
     mat4x4 MP;
 
-    vec3 position = {};
-
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
@@ -141,12 +180,13 @@ int main(void) {
         ClearBackground(BLACK);
 
         for (int i = 0; i < 4; i++) {
-            model.m33 = sinf(GetTime());
+            model.m33 = -10 * sinf(GetTime());
+            mat4x4 rot = mat4x4_rotate_y(0.01);
+            model = mat4x4_mul(model, rot);
+            MP = mat4x4_mul(model, perspective);
 
-            MP = mat4x4_mul(model, projection);
-
-            vec3 first = mat4x4_mul_vec3(MP, square[i]);
-            vec3 next = mat4x4_mul_vec3(MP, square[(i+1)%4]);
+            vec3 first = vec3_mul_mat4x4(MP, square[i]);
+            vec3 next = vec3_mul_mat4x4(MP, square[(i+1)%4]);
 
             first = screen_to_world_space(first);
             next =  screen_to_world_space(next);

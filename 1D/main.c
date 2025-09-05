@@ -15,9 +15,6 @@ int main(void) {
     InitWindow(1280, 720, "1D Graphics");
 
     double x = 0;
-    double y = 0;
-
-    double i = 0;
 
     SetTargetFPS(60);
 
@@ -25,11 +22,10 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
+        x = sinf(GetTime());
+
         double world_x = screen_to_world_space(x);
         DrawCircle(world_x, GetScreenHeight()/2, 25, RED);
-        x = sinf(i);
-        
-        i += 0.01;
 
         EndDrawing();
     }
