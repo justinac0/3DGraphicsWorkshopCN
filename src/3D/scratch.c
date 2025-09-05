@@ -1,8 +1,9 @@
+#include "scratch.h"
+
 #include <stdio.h>
 #include <raylib.h>
 #include <math.h>
 
-// 1 meter = ~250px
 #define METER (250)
 
 typedef struct vec3 {
@@ -140,63 +141,55 @@ void vec3_set(vec3 *v, double x, double y, double z) {
     v->z = z;
 }
 
-int main(void) {
-    InitWindow(1280, 720, "3D Graphics");
-    
-    mat4x4 model = {
-        (vec4){1, 0, 0, 0},
-        (vec4){0, 1, 0, 0},
-        (vec4){0, 0, 1, 0},
-        (vec4){0, 0, 0, 1},
-    };
+static mat4x4 model;
+static mat4x4 perspective;
+static vec3 square[4];
+static mat4x4 MP;
 
-
+void setup(void) {
     // ref https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
     double fov = 90.0;
     double far = 100.0;
     double near = 0.01;
     double s = 1/(tanf((fov/2.0)*(PI/180.0)));
 
-    mat4x4 perspective = {
+    model = (mat4x4){
+        (vec4){1, 0, 0, 0},
+        (vec4){0, 1, 0, 0},
+        (vec4){0, 0, 1, 0},
+        (vec4){0, 0, 0, 1},
+    };
+
+    perspective = (mat4x4){
         (vec4){s, 0, 0, 0},
         (vec4){0, s, 0, 0},
         (vec4){0, 0, -((far/(far-near))), -(far*near)/(far-near)},
         (vec4){0, 0, -1, 1},
     };
 
-    vec3 square[4] = {
-        (vec3){ -1.0, 1.0, 0.0 },
-        (vec3){  1.0, 1.0, 0.0 },
-        (vec3){  1.0,-1.0, 0.0 },
-        (vec3){ -1.0,-1.0, 0.0 },
-    };
+    square[0] = (vec3){ -1.0, 1.0, 0.0 };
+    square[1] = (vec3){  1.0, 1.0, 0.0 };
+    square[2] = (vec3){  1.0,-1.0, 0.0 };
+    square[3] = (vec3){ -1.0,-1.0, 0.0 };
+}
 
-    mat4x4 MP;
-
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        for (int i = 0; i < 4; i++) {
-            model.m33 = -10 * sinf(GetTime());
-            mat4x4 rot = mat4x4_rotate_y(0.01);
-            model = mat4x4_mul(model, rot);
-            MP = mat4x4_mul(model, perspective);
-
-            vec3 first = vec3_mul_mat4x4(MP, square[i]);
-            vec3 next = vec3_mul_mat4x4(MP, square[(i+1)%4]);
-
-            first = screen_to_world_space(first);
-            next =  screen_to_world_space(next);
-
-            DrawLine(first.x, first.y, next.x, next.y, RED);
-        }
-
-        EndDrawing();
+void update(void) {
+    for (int i = 0; i < 4; i++) {
+        model.m33 = -10 * sinf(GetTime());
+        mat4x4 rot = mat4x4_rotate_y(0.01);
+        model = mat4x4_mul(model, rot);
+        MP = mat4x4_mul(model, perspective);
     }
+}
 
-    CloseWindow();
-    return 0;
+void draw(void) {
+    for (int i = 0; i < 4; i++) {
+        vec3 first = vec3_mul_mat4x4(MP, square[i]);
+        vec3 next = vec3_mul_mat4x4(MP, square[(i+1)%4]);
+
+        first = screen_to_world_space(first);
+        next =  screen_to_world_space(next);
+
+        DrawLine(first.x, first.y, next.x, next.y, RED);
+    }
 }
