@@ -14,7 +14,6 @@ double screen_to_world_space(double position) {
     return unit_scale(position) + ((double)GetScreenWidth()/2);
 }
 
-// Variables
 static double x;
 static double world_x;
 

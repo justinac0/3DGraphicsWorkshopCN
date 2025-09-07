@@ -144,7 +144,39 @@ void vec3_set(vec3 *v, double x, double y, double z) {
 static mat4x4 model;
 static mat4x4 perspective;
 static vec3 square[4];
+const double f = 0.5;
+static vec3 cube[8] = {
+    // front face
+    (vec3){f, -f,  f},     // 0 front: tl
+    (vec3){f,  f,  f},      // 1 front: tr
+    (vec3){f, -f, -f},    // 2 front: bl
+    (vec3){f,  f, -f},     // 3 front: br
+    // back face
+    (vec3){-f, -f, f},    // 4 back: tl
+    (vec3){-f,  f, f},     // 5 back: tr
+    (vec3){-f, -f,-f},    // 6 back: bl
+    (vec3){-f,  f,-f},     // 7 back: br
+};
+
+static int lines[24] = {
+    0, 1,
+    0, 2,
+    1, 3,
+    2, 3,
+
+    4, 5,
+    5, 7,
+    6, 7,
+    4, 6,
+
+    0, 4,
+    1, 5,
+    2, 6,
+    3, 7,
+};
+
 static mat4x4 MP;
+static double dial;
 
 void setup(void) {
     // ref https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
@@ -152,6 +184,7 @@ void setup(void) {
     double far = 100.0;
     double near = 0.01;
     double s = 1/(tanf((fov/2.0)*(PI/180.0)));
+    dial = 0;
 
     model = (mat4x4){
         (vec4){1, 0, 0, 0},
@@ -174,22 +207,36 @@ void setup(void) {
 }
 
 void update(void) {
-    for (int i = 0; i < 4; i++) {
-        model.m33 = -10 * sinf(GetTime());
-        mat4x4 rot = mat4x4_rotate_y(0.01);
-        model = mat4x4_mul(model, rot);
-        MP = mat4x4_mul(model, perspective);
-    }
+    model.m33 = -2.0;
+
+    dial = sinf(GetTime());
+
+    model = mat4x4_mul(model, mat4x4_rotate_y(0.01));
+    model = mat4x4_mul(model, mat4x4_rotate_z(0.01));
+
+    MP = mat4x4_mul(model, perspective);
 }
 
+#include <math.h>
+
 void draw(void) {
-    for (int i = 0; i < 4; i++) {
-        vec3 first = vec3_mul_mat4x4(MP, square[i]);
-        vec3 next = vec3_mul_mat4x4(MP, square[(i+1)%4]);
+    for (int i = 0; i < sizeof(lines)/sizeof(*lines); i+=2) {
+        int k0 = lines[i];
+        int k1 = lines[i+1];
+
+        vec3 first = vec3_mul_mat4x4(MP, cube[k0]);
+        vec3 next = vec3_mul_mat4x4(MP, cube[k1]);
 
         first = screen_to_world_space(first);
         next =  screen_to_world_space(next);
 
-        DrawLine(first.x, first.y, next.x, next.y, RED);
+        DrawLine(first.x, first.y, next.x, next.y, RED);        
+    }
+
+    for (int i = 0; i < sizeof(cube)/sizeof(*cube); i++) {
+        vec3 world = vec3_mul_mat4x4(MP, cube[i]);
+        world = screen_to_world_space(world);
+        printf("%f\n", world.z);
+        DrawCircle(world.x, world.y, 5, RED);
     }
 }
