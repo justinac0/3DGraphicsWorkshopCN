@@ -26,6 +26,15 @@ vec3 vec3_scalar(vec3 a, double s) {
     };
 }
 
+vec3 screen_to_world_space(vec3 position) {
+    vec3 screenOffset = (vec3){
+        .x = (double)(GetScreenWidth()/2.0),
+        .y = (double)(GetScreenHeight()/2.0),
+    };
+
+    return vec3_add(vec3_scalar(position, METER), screenOffset);
+}
+
 typedef struct vec4 {
     double x, y, z, w;
 } vec4;
@@ -66,12 +75,13 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     return result;
 }
 
-mat4x4 mat4x4_rotate_z(double v) {
+// Transformations: Rotation (x, y, z)
+mat4x4 mat4x4_rotate_x(double v) {
     mat4x4 m = {
-        (vec4){cosf(v), -sinf(v), 0, 0},
-        (vec4){sinf(v),  cos(v),  0, 0},
-        (vec4){0,        0,       1, 0},
-        (vec4){0,        0,       0, 1},
+        (vec4){1, 0,       0,        0},
+        (vec4){0, cosf(v), -sinf(v), 0},
+        (vec4){0, sinf(v), cosf(v),  0},
+        (vec4){0, 0,       0,        1},
     };
 
     return m;
@@ -84,16 +94,16 @@ mat4x4 mat4x4_rotate_y(double v) {
         (vec4){-sinf(v), 0, cosf(v),  0},
         (vec4){0,        0, 0,        1},
     };
-
+    
     return m;
 }
 
-mat4x4 mat4x4_rotate_x(double v) {
+mat4x4 mat4x4_rotate_z(double v) {
     mat4x4 m = {
-        (vec4){1, 0,       0,        0},
-        (vec4){0, cosf(v), -sinf(v), 0},
-        (vec4){0, sinf(v), cosf(v),  0},
-        (vec4){0, 0,       0,        1},
+        (vec4){cosf(v), -sinf(v), 0, 0},
+        (vec4){sinf(v),  cos(v),  0, 0},
+        (vec4){0,        0,       1, 0},
+        (vec4){0,        0,       0, 1},
     };
 
     return m;
@@ -116,34 +126,7 @@ vec3 vec3_mul_mat4x4(mat4x4 a, vec3 v) {
     return result;
 }
 
-void mat4x4_print(mat4x4 a) {
-    printf("Matrix:\n");
-    printf("%f, %f, %f, %f\n", a.m00, a.m01, a.m02, a.m03);
-    printf("%f, %f, %f, %f\n", a.m10, a.m11, a.m12, a.m13);
-    printf("%f, %f, %f, %f\n", a.m20, a.m21, a.m22, a.m23);
-    printf("%f, %f, %f, %f\n\n", a.m30, a.m31, a.m32, a.m33);
-}
-
-vec3 screen_to_world_space(vec3 position) {
-    vec3 screenOffset = (vec3){
-        .x = (double)(GetScreenWidth()/2.0),
-        .y = (double)(GetScreenHeight()/2.0),
-    };
-
-    return vec3_add(vec3_scalar(position, METER), screenOffset);
-}
-
-void vec3_set(vec3 *v, double x, double y, double z) {
-    if (!v) return;
-
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-
-static mat4x4 model;
-static mat4x4 perspective;
-static vec3 square[4];
+// Geometric Primitives
 const double f = 0.5;
 static vec3 cube[8] = {
     // front face
@@ -163,61 +146,52 @@ static int lines[24] = {
     0, 2,
     1, 3,
     2, 3,
-
+    
     4, 5,
     5, 7,
     6, 7,
     4, 6,
-
+    
     0, 4,
     1, 5,
     2, 6,
     3, 7,
 };
 
+// Matricies
+static mat4x4 model;
+static mat4x4 perspective;
 static mat4x4 MP;
-static double dial;
 
 void setup(void) {
-    // ref https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
-    double fov = 90.0;
-    double far = 100.0;
-    double near = 0.01;
-    double s = 1/(tanf((fov/2.0)*(PI/180.0)));
-    dial = 0;
-
     model = (mat4x4){
         (vec4){1, 0, 0, 0},
         (vec4){0, 1, 0, 0},
         (vec4){0, 0, 1, 0},
         (vec4){0, 0, 0, 1},
     };
-
+    
+    // ref https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html
+    double fov = 90.0;
+    double far = 100.0;
+    double near = 0.01;
+    double s = 1/(tanf((fov/2.0)*(PI/180.0)));
     perspective = (mat4x4){
         (vec4){s, 0, 0, 0},
         (vec4){0, s, 0, 0},
         (vec4){0, 0, -((far/(far-near))), -(far*near)/(far-near)},
         (vec4){0, 0, -1, 1},
     };
-
-    square[0] = (vec3){ -1.0, 1.0, 0.0 };
-    square[1] = (vec3){  1.0, 1.0, 0.0 };
-    square[2] = (vec3){  1.0,-1.0, 0.0 };
-    square[3] = (vec3){ -1.0,-1.0, 0.0 };
 }
 
 void update(void) {
     model.m33 = -2.0;
-
-    dial = sinf(GetTime());
 
     model = mat4x4_mul(model, mat4x4_rotate_y(0.01));
     model = mat4x4_mul(model, mat4x4_rotate_z(0.01));
 
     MP = mat4x4_mul(model, perspective);
 }
-
-#include <math.h>
 
 void draw(void) {
     for (int i = 0; i < sizeof(lines)/sizeof(*lines); i+=2) {
@@ -236,7 +210,6 @@ void draw(void) {
     for (int i = 0; i < sizeof(cube)/sizeof(*cube); i++) {
         vec3 world = vec3_mul_mat4x4(MP, cube[i]);
         world = screen_to_world_space(world);
-        printf("%f\n", world.z);
         DrawCircle(world.x, world.y, 5, RED);
     }
 }
