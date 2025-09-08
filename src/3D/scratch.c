@@ -186,7 +186,6 @@ void setup(void) {
 
 void update(void) {
     model.m33 = -2.0;
-
     model = mat4x4_mul(model, mat4x4_rotate_y(0.01));
     model = mat4x4_mul(model, mat4x4_rotate_z(0.01));
 
