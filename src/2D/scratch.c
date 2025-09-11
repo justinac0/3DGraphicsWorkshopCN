@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <math.h>
 
-#define METER (250)
+#define UNIT (250)
 
 typedef struct vec2 {
     double x, y;
@@ -30,7 +30,7 @@ vec2 screen_to_world_space(vec2 position) {
         .y = (double)(GetScreenHeight()/2.0),
     };
 
-    return vec2_add(vec2_scalar(position, METER), screenOffset);
+    return vec2_add(vec2_scalar(position, UNIT), screenOffset);
 }
 
 void vec2_set(vec2 *v, double x, double y) {

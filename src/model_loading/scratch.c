@@ -32,7 +32,7 @@ vec3 screen_to_world_space(vec3 position) {
         .y = (double)(GetScreenHeight()/2.0),
     };
 
-    return vec3_add(vec3_scalar(position, METER), screenOffset);
+    return vec3_add(vec3_scalar(position, UNIT), screenOffset);
 }
 
 typedef struct vec4 {
@@ -109,7 +109,7 @@ mat4x4 mat4x4_rotate_z(double v) {
     return m;
 }
 
-vec3 vec3_mul_mat4x4(mat4x4 a, vec3 v) {
+vec3 mat4x4_mul_vec3(mat4x4 a, vec3 v) {
     vec3 result = {0, 0, 0};
 
     result.x = a.m00 * v.x + a.m10 * v.y + a.m20 * v.z + a.m30;
@@ -164,8 +164,8 @@ void draw(void) {
     //     int k0 = lines[i];
     //     int k1 = lines[i+1];
 
-    //     vec3 first = vec3_mul_mat4x4(MP, cube[k0]);
-    //     vec3 next = vec3_mul_mat4x4(MP, cube[k1]);
+    //     vec3 first = mat4x4_mul_vec3(MP, cube[k0]);
+    //     vec3 next = mat4x4_mul_vec3(MP, cube[k1]);
 
     //     first = screen_to_world_space(first);
     //     next =  screen_to_world_space(next);
@@ -174,7 +174,7 @@ void draw(void) {
     // }
 
     // for (int i = 0; i < sizeof(cube)/sizeof(*cube); i++) {
-    //     vec3 world = vec3_mul_mat4x4(MP, cube[i]);
+    //     vec3 world = mat4x4_mul_vec3(MP, cube[i]);
     //     world = screen_to_world_space(world);
     //     DrawCircle(world.x, world.y, 5, RED);
     // }

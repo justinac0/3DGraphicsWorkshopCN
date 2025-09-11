@@ -4,10 +4,10 @@
 
 #include <math.h>
 
-#define METER (250)
+#define UNIT (250)
 
 double unit_scale(double x) {
-    return x * METER;
+    return x * UNIT;
 }
 
 double screen_to_world_space(double position) {
