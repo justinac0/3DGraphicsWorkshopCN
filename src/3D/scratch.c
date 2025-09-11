@@ -66,7 +66,7 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
         for (int col = 0; col < 4; col++) {
             double sum = 0;
             for (int q = 0; q < 4; q++) {
-                sum +=  a.mm[row][q] * b.mm[q][col];
+                sum +=  a.mm[col][q] * b.mm[q][row];
             }
             result.mm[row][col] = sum;
         }
@@ -149,13 +149,13 @@ void setup(void) {
     perspective = (mat4x4){
         (vec4){1, 0, 0, 0},
         (vec4){0, 1, 0, 0},
-        (vec4){0, 0, 1, 0},
-        (vec4){0, 0, 1, 0},
+        (vec4){0, 0, 0, 0},
+        (vec4){0, 0, 0, 0},
     };
 }
 
 void update(void) {
-    model = mat4x4_translate((vec3){0,0, -3});
+    model = mat4x4_translate((vec3){0,sinf(GetTime()), -2.2});
     MP = mat4x4_mul(perspective, model);
 }
 
