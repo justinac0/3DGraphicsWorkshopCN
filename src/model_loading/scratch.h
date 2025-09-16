@@ -4,5 +4,6 @@
 void setup(void);
 void update(void);
 void draw(void);
+void cleanup(void);
 
 #endif // SCRATCH

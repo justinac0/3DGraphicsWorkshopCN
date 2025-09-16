@@ -34,6 +34,7 @@ int main(void) {
         EndDrawing();
     }
 
+    cleanup();
     CloseWindow();
     return 0;
 }
