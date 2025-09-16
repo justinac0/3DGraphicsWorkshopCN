@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define UNIT (250)
+#define DEFAULT_VERT_CAP (10000)
+#define UNIT (150)
 
 typedef struct vec3 {
   double x, y, z;
@@ -234,9 +235,9 @@ mesh load_wavefront(const char *filepath) {
     perror("failed to load file");
   }
 
-  mesh m = mesh_init(1024, 3 * 1024);
+  mesh m = mesh_init(DEFAULT_VERT_CAP, 3 * DEFAULT_VERT_CAP);
 
-  char line[1024];
+  char line[2048];
   //.read through wavefront obj file and parse contents
   while (fgets(line, sizeof(line), file)) {
     // add verticies
@@ -272,7 +273,7 @@ static mat4x4 perspective;
 static mat4x4 MP;
 
 void setup(void) {
-  geometry = load_wavefront("models/isosphere.obj");
+  geometry = load_wavefront("models/keytruck.obj");
 
   model = (mat4x4){
       (vec4){1, 0, 0, 0},
@@ -291,7 +292,7 @@ void setup(void) {
 
 void update(void) {
   mat4x4 translate = mat4x4_translate((vec3){sinf(GetTime()),cosf(GetTime()),-5});
-  mat4x4 rotate = mat4x4_rotate_z(GetTime());
+  mat4x4 rotate = mat4x4_rotate_z(0);
   mat4x4 scale = mat4x4_identity();
   model = mat4x4_mul(translate, rotate);
   model = mat4x4_mul(model, scale);
