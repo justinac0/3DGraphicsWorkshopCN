@@ -1,11 +1,11 @@
 #include "scratch.h"
 
 #include <assert.h>
-#include <string.h>
 #include <math.h>
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define UNIT (250)
 
@@ -60,6 +60,17 @@ mat4x4 mat4x4_fill(double v) {
       (vec4){v, v, v, v},
       (vec4){v, v, v, v},
   };
+  return result;
+}
+
+mat4x4 mat4x4_identity(void) {
+  mat4x4 result = {
+      (vec4){1, 0, 0, 0},
+      (vec4){0, 1, 0, 0},
+      (vec4){0, 0, 1, 0},
+      (vec4){0, 0, 0, 1},
+  };
+  return result;
 }
 
 mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
@@ -83,6 +94,39 @@ mat4x4 mat4x4_translate(vec3 offset) {
       (vec4){1, 0, 0, offset.x},
       (vec4){0, 1, 0, offset.y},
       (vec4){0, 0, 1, offset.z},
+      (vec4){0, 0, 0, 1},
+  };
+
+  return m;
+}
+
+mat4x4 mat4x4_rotate_x(double theta) {
+  mat4x4 m = {
+      (vec4){1, 0, 0, 0},
+      (vec4){0, cosf(theta), -sinf(theta), 0},
+      (vec4){0, sinf(theta), cosf(theta), 0},
+      (vec4){0, 0, 0, 1},
+  };
+
+  return m;
+}
+
+mat4x4 mat4x4_rotate_y(float theta) {
+  mat4x4 m = {
+      (vec4){cosf(theta), 0, sinf(theta), 0},
+      (vec4){0, 1, 0, 0},
+      (vec4){-sinf(theta), 0, cosf(theta), 0},
+      (vec4){0, 0, 0, 1},
+  };
+
+  return m;
+}
+
+mat4x4 mat4x4_rotate_z(float theta) {
+  mat4x4 m = {
+      (vec4){cosf(theta), -sinf(theta), 0, 0},
+      (vec4){sinf(theta), cosf(theta), 0, 0},
+      (vec4){0, 0, 1, 0},
       (vec4){0, 0, 0, 1},
   };
 
@@ -182,16 +226,9 @@ void mesh_draw(mesh *m, mat4x4 *mp) {
 
     DrawLine(first.x, first.y, next.x, next.y, RED);
   }
-
-  for (int i = 0; i < m->verts_len; i++) {
-    vec3 world = mat4x4_mul_vec3(*mp, m->verts[i]);
-    world = screen_to_world_space(world);
-    DrawCircle(world.x, world.y, 3, RED);
-  }
 }
 
-// this function expects a triangulated mesh
-mesh load_triangulated_wavefront(const char *filepath) {
+mesh load_wavefront(const char *filepath) {
   FILE *file = fopen(filepath, "r");
   if (!file) {
     perror("failed to load file");
@@ -202,24 +239,23 @@ mesh load_triangulated_wavefront(const char *filepath) {
   char line[1024];
   //.read through wavefront obj file and parse contents
   while (fgets(line, sizeof(line), file)) {
-    printf("%s", line);
     // add verticies
     if (strncmp(line, "v ", 2) == 0) {
-        float x, y, z;
-        int status = sscanf(line+2, "%f %f %f\n", &x, &y, &z);
-        assert(status == 3);
-        mesh_add_vert(&m, (vec3){x,y,z});
+      float x, y, z;
+      int status = sscanf(line + 2, "%f %f %f\n", &x, &y, &z);
+      assert(status == 3);
+      mesh_add_vert(&m, (vec3){x, y, z});
     }
     // add lines
+    // f v1/vt1 v2/vt2 v3/vt3 ...
     if (strncmp(line, "f ", 2) == 0) {
-        int p0, p1, p2, p3, p4, p5;
-        int status = sscanf(line+2, "%d/%d %d/%d %d/%d\n", &p0, &p1, &p2, &p3, &p4, &p5);
-        assert(status == 6);
+      int p0, p1, p2, p3, p4, p5;
+      int status =
+          sscanf(line + 2, "%d/%d %d/%d %d/%d\n", &p0, &p1, &p2, &p3, &p4, &p5);
+      assert(status == 6);
 
-        // add lines
-        mesh_add_line(&m, (vec2i){p0-1,p1-1});
-        mesh_add_line(&m, (vec2i){p2-1,p3-1});
-        mesh_add_line(&m, (vec2i){p4-1,p5-1});
+      mesh_add_line(&m, (vec2i){p0 - 1, p2 - 1});
+      mesh_add_line(&m, (vec2i){p2 - 1, p4 - 1});
     }
   }
 
@@ -236,30 +272,7 @@ static mat4x4 perspective;
 static mat4x4 MP;
 
 void setup(void) {
-  geometry = mesh_init(1024, 1024);
-
-  const double f = 0.5;
-  mesh_add_vert(&geometry, (vec3){f, -f, f});
-  mesh_add_vert(&geometry, (vec3){f, f, f});
-  mesh_add_vert(&geometry, (vec3){f, -f, -f});
-  mesh_add_vert(&geometry, (vec3){f, f, -f});
-  mesh_add_vert(&geometry, (vec3){-f, -f, f});
-  mesh_add_vert(&geometry, (vec3){-f, f, f});
-  mesh_add_vert(&geometry, (vec3){-f, -f, -f});
-  mesh_add_vert(&geometry, (vec3){-f, f, -f});
-
-  mesh_add_line(&geometry, (vec2i){0, 1});
-  mesh_add_line(&geometry, (vec2i){0, 2});
-  mesh_add_line(&geometry, (vec2i){1, 3});
-  mesh_add_line(&geometry, (vec2i){2, 3});
-  mesh_add_line(&geometry, (vec2i){4, 5});
-  mesh_add_line(&geometry, (vec2i){5, 7});
-  mesh_add_line(&geometry, (vec2i){6, 7});
-  mesh_add_line(&geometry, (vec2i){4, 6});
-  mesh_add_line(&geometry, (vec2i){0, 4});
-  mesh_add_line(&geometry, (vec2i){1, 5});
-  mesh_add_line(&geometry, (vec2i){2, 6});
-  mesh_add_line(&geometry, (vec2i){3, 7});
+  geometry = load_wavefront("models/isosphere.obj");
 
   model = (mat4x4){
       (vec4){1, 0, 0, 0},
@@ -274,20 +287,17 @@ void setup(void) {
       (vec4){0, 0, 1, 1},
       (vec4){0, 0, 1, 0},
   };
-
-  mesh tmp = load_triangulated_wavefront("models/cube.obj");
-  mesh_free(&tmp);
 }
 
 void update(void) {
-  model = mat4x4_translate((vec3){0, sinf(GetTime()), -2.2});
+  mat4x4 translate = mat4x4_translate((vec3){sinf(GetTime()),cosf(GetTime()),-5});
+  mat4x4 rotate = mat4x4_rotate_z(GetTime());
+  mat4x4 scale = mat4x4_identity();
+  model = mat4x4_mul(translate, rotate);
+  model = mat4x4_mul(model, scale);
   MP = mat4x4_mul(perspective, model);
 }
 
-void draw(void) {
-  mesh_draw(&geometry, &MP);
-}
+void draw(void) { mesh_draw(&geometry, &MP); }
 
-void cleanup(void) {
-    mesh_free(&geometry);
-}
+void cleanup(void) { mesh_free(&geometry); }
