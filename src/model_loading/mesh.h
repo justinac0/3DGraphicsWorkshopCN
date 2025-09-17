@@ -11,7 +11,7 @@
 
 #include "math.h"
 
-#define DEFAULT_VERT_CAP (10000)
+#define DEFAULT_VERT_CAP (1000000)
 
 typedef struct mesh {
   size_t lines_len;
