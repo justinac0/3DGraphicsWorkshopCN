@@ -38,7 +38,8 @@ void setup(void) {
   perspective = mat4x4_perspective(100, 0.001, 70, 4/3);
 }
 
-void camera_update(void) {
+static double wheel = 1;
+void manual_rotate_model(void) {
   double speed = 0.1;
   double sens = 0.01;
 
@@ -47,37 +48,34 @@ void camera_update(void) {
   cam.position.y += -(IsKeyDown(KEY_SPACE) - IsKeyDown(KEY_LEFT_SHIFT)) * speed;
 
   Vector2 delta = GetMouseDelta();
+  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
   cam.yaw   -= delta.x * sens;
   cam.pitch += delta.y * sens;
-  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
-
-  if (cam.pitch > 89.0f) cam.pitch = 89.0f;
-  if (cam.pitch < -89.0f) cam.pitch = -89.0f;
 
   mat4x4 roty = mat4x4_rotate_y(cam.yaw);
   mat4x4 rotx = mat4x4_rotate_x(cam.pitch);
   mat4x4 rot = mat4x4_mul(rotx, roty);
 
-  mat4x4 pos = mat4x4_translate(cam.position);
+  wheel += GetMouseWheelMove()/5.0;
+  if (wheel > 4.0f) wheel = 4.0;
+  if (wheel < 0.2) wheel = 0.2;
 
-  view = mat4x4_mul(mat4x4_identity(), pos);
-  view = mat4x4_mul(view, rot);
+  mat4x4 scale = mat4x4_scale(vec3_set(wheel, wheel, wheel));
+  model = mat4x4_mul(model, rot);
+  model = mat4x4_mul(model, scale);
 }
 
-void update(void) {
-  camera_update();
+void update(void) {}
 
-  // mat4x4 translate = mat4x4_translate(vec3_set(0, 0, 0));
-  // mat4x4 rotate = mat4x4_rotate_y(GetTime());
-  // mat4x4 scale = mat4x4_scale(vec3_set(1, 1, 1));
-
-  // model = mat4x4_mul(translate, scale);
-  // model = mat4x4_mul(model, rotate);
+void draw(void) {
+  mat4x4 translate = mat4x4_translate(vec3_set(0, 0, -5));
+  
+  model = mat4x4_mul(mat4x4_identity(), translate);
+  manual_rotate_model();
   
   MVP = mat4x4_mul(perspective, view);
   MVP = mat4x4_mul(MVP, model);
+  mesh_draw(&geometry, &MVP);
 }
-
-void draw(void) { mesh_draw(&geometry, &MVP); }
 
 void cleanup(void) { mesh_free(&geometry); }
