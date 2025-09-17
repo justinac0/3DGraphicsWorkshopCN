@@ -167,18 +167,12 @@ mat4x4 mat4x4_rotate_z(double theta) {
     return m;
 }
 
-vec3 mat4x4_mul_vec3(mat4x4 m, vec3 v) {
-    vec3 result;
-    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z) + m.m03;
-    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + m.m13;
-    result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + m.m23;
-    double w = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + m.m33;
-
-    if (fabs(w) > 1e-8) {
-        result.x /= w;
-        result.y /= w;
-        result.z /= w;
-    }
+vec4 mat4x4_mul_vec4(mat4x4 m, vec4 v) {
+    vec4 result;
+    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z) + (m.m03 * v.w);
+    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + (m.m13 * v.w);
+    result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + (m.m23 * v.w);
+    result.w = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + (m.m33 * v.w);
 
     return result;
 }
@@ -198,22 +192,18 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
 }
 
 mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) {
-    return (mat4x4){
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, (zfar+znear)/(znear-zfar), (2.0*zfar*znear)/(znear-zfar),
-        0, 0, -1, 0
-    };
-}
+    mat4x4 m = mat4x4_identity();
+    double range = tanf(fov / 2.0);
 
-// mat4x4 mat4x4_view(vec3 up, vec3 right, vec3 forward, vec3 pos) {
-//     return (mat4x4){
-//         right.x, right.y, right.z, -vec3_dot(right, pos),
-//         up.x, up.y, up.z, -vec3_dot(up, pos),
-//         forward.x, forward.y, forward.z, vec3_dot(forward, pos),
-//         0, 0, 0, 1
-//     };
-// }
+    m.m00 = 1/(range*aspect);
+    m.m11 = 1/range;
+
+    m.m22 = -(zfar + znear) / (zfar - znear);
+    m.m32 = -1;
+    m.m23 = -((2.0 * zfar * znear) / (zfar - znear));
+
+    return m;
+}
 
 mat4x4 mat4x4_lookat(vec3 eye, vec3 target, vec3 worldUp) {
     vec3 f = vec3_norm(vec3_sub(target, eye));
@@ -221,12 +211,71 @@ mat4x4 mat4x4_lookat(vec3 eye, vec3 target, vec3 worldUp) {
     vec3 u = vec3_cross(r, f);
 
     mat4x4 m;
-    m.mn[0][0] =  r.x;  m.mn[0][1] =  r.y;  m.mn[0][2] =  r.z;  m.mn[0][3] = -vec3_dot(r, eye);
-    m.mn[1][0] =  u.x;  m.mn[1][1] =  u.y;  m.mn[1][2] =  u.z;  m.mn[1][3] = -vec3_dot(u, eye);
-    m.mn[2][0] = -f.x;  m.mn[2][1] = -f.y;  m.mn[2][2] = -f.z;  m.mn[2][3] =  vec3_dot(f, eye);
-    m.mn[3][0] =  0.0;  m.mn[3][1] =  0.0;  m.mn[3][2] =  0.0;  m.mn[3][3] =  1.0;
+    m.m00 =  r.x;  m.m01 =  r.y;  m.m02 =  r.z;  m.m03 = -vec3_dot(r, eye);
+    m.m10 =  u.x;  m.m11 =  u.y;  m.m12 =  u.z;  m.m13 = -vec3_dot(u, eye);
+    m.m20 = -f.x;  m.m21 = -f.y;  m.m22 = -f.z;  m.m23 =  vec3_dot(f, eye);
+    m.m30 =  0.0;  m.m31 =  0.0;  m.m32 =  0.0;  m.m33 =  1.0;
 
     return m;
+}
+
+bool inside_clip(vec4 v) {
+    return (-v.w <= v.x && v.x <= v.w) &&
+           (-v.w <= v.y && v.y <= v.w) &&
+           (-v.w <= v.z && v.z <= v.w);
+}
+
+vec4 vec4_lerp(vec4 a, vec4 b, double t) {
+    return (vec4){
+        a.x + (b.x - a.x) * t,
+        a.y + (b.y - a.y) * t,
+        a.z + (b.z - a.z) * t,
+        a.w + (b.w - a.w) * t
+    };
+}
+
+bool clip_line(vec4 *v0, vec4 *v1) {
+    for (int plane = 0; plane < 6; plane++) {
+        double a0, a1;
+
+        switch (plane) {
+            case 0: a0 =  v0->x + v0->w; a1 =  v1->x + v1->w; break;
+            case 1: a0 = -v0->x + v0->w; a1 = -v1->x + v1->w; break;
+            case 2: a0 =  v0->y + v0->w; a1 =  v1->y + v1->w; break;
+            case 3: a0 = -v0->y + v0->w; a1 = -v1->y + v1->w; break;
+            case 4: a0 =  v0->z + v0->w; a1 =  v1->z + v1->w; break;
+            case 5: a0 = -v0->z + v0->w; a1 = -v1->z + v1->w; break;
+        }
+
+        if (a0 < 0 && a1 < 0) return false;
+
+        if (a0 < 0 || a1 < 0) {
+            double t = a0 / (a0 - a1);
+            vec4 newv = vec4_lerp(*v0, *v1, t);
+            if (a0 < 0) {
+                *v0 = newv;
+            } else {
+                *v1 = newv;
+            }
+        }
+    }
+
+    return true;
+}
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} viewport;
+
+vec3 ndc_to_screen(vec3 ndc, viewport vp) {
+    vec3 out;
+    out.x = vp.x + (ndc.x + 1.0) * 0.5 * vp.width;
+    out.y = vp.y + (1.0 - (ndc.y + 1.0) * 0.5) * vp.height; // flip Y
+    out.z = ndc.z; // depth stays in [-1,1] or [0,1] depending on convention
+    return out;
 }
 
 #endif // MATH_H

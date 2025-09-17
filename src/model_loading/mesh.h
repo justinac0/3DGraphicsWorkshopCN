@@ -76,11 +76,21 @@ void mesh_draw(mesh *m, mat4x4 *mp) {
     int k0 = m->lines[i].x;
     int k1 = m->lines[i].y;
 
-    vec3 first = mat4x4_mul_vec3(*mp, m->verts[k0]);
-    vec3 next = mat4x4_mul_vec3(*mp, m->verts[k1]);
+    vec4 hv0 = { m->verts[k0].x, m->verts[k0].y, m->verts[k0].z, 1.0 };
+    vec4 hv1 = { m->verts[k1].x, m->verts[k1].y, m->verts[k1].z, 1.0 };
 
-    first = screen_to_world_space(first);
-    next = screen_to_world_space(next);
+    viewport vp = { .x = 0, .y = 0, .width = GetScreenWidth(), .height = GetScreenHeight() };
+
+    vec4 clip0 = mat4x4_mul_vec4(*mp, hv0);
+    vec4 clip1 = mat4x4_mul_vec4(*mp, hv1);
+
+    if (!clip_line(&clip0, &clip1)) continue;
+
+    clip0.x /= clip0.w; clip0.y /= clip0.w; clip0.z /= clip0.w;
+    clip1.x /= clip1.w; clip1.y /= clip1.w; clip1.z /= clip1.w;
+
+    vec3 first = ndc_to_screen((vec3){clip0.x, clip0.y, clip0.z}, vp);
+    vec3 next  = ndc_to_screen((vec3){clip1.x, clip1.y, clip1.z}, vp);
 
     DrawLine(first.x, first.y, next.x, next.y, RED);
   }
