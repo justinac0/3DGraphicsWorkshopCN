@@ -41,7 +41,7 @@ typedef struct vec4 {
 
 typedef union mat4x4 {
     vec4 v[4];
-    double mm[4][4];
+    double mn[4][4];
     struct {
         double m00, m01, m02, m03;
         double m10, m11, m12, m13;
@@ -66,9 +66,9 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
         for (int col = 0; col < 4; col++) {
             double sum = 0;
             for (int q = 0; q < 4; q++) {
-                sum +=  a.mm[col][q] * b.mm[q][row];
+                sum +=  a.mn[col][q] * b.mn[q][row];
             }
-            result.mm[row][col] = sum;
+            result.mn[row][col] = sum;
         }
     }
 
