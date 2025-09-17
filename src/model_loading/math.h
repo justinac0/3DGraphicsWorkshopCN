@@ -193,7 +193,7 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
 
 mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) {
     mat4x4 m = mat4x4_identity();
-    double range = tanf(fov / 2.0);
+    double range = atanf(fov / 2.0);
 
     m.m00 = 1/(range*aspect);
     m.m11 = 1/range;

@@ -20,90 +20,55 @@ static mesh geometry;
 typedef struct {
     vec3 position;
     vec3 forward;
-    vec3 right;
     vec3 up;
+    double yaw;
+    double pitch;
 } camera;
 
 static camera cam;
 
-void camera_move_forward(camera *cam, double dist) {
-    cam->position.x += cam->forward.x * dist;
-    cam->position.y += cam->forward.y * dist;
-    cam->position.z += cam->forward.z * dist;
-}
-
-void camera_move_right(camera *cam, double dist) {
-    cam->position.x += cam->right.x * dist;
-    cam->position.y += cam->right.y * dist;
-    cam->position.z += cam->right.z * dist;
-}
-
-void camera_move_up(camera *cam, double dist) {
-    cam->position.x += cam->up.x * dist;
-    cam->position.y += cam->up.y * dist;
-    cam->position.z += cam->up.z * dist;
-}
-
-void camera_yaw(camera *cam, double angle) {
-    double c = cos(angle), s = sin(angle);
-    vec3 f = cam->forward;
-    cam->forward.x = f.x * c + f.z * s;
-    cam->forward.z = -f.x * s + f.z * c;
-    cam->forward = vec3_norm(cam->forward);
-
-    // recompute right = forward × worldUp
-    cam->right = vec3_norm(vec3_cross(cam->forward, (vec3){0,1,0}));
-    cam->up    = vec3_cross(cam->right, cam->forward);
-}
-
-void camera_pitch(camera *cam, double angle) {
-    double c = cos(angle), s = sin(angle);
-    vec3 f = cam->forward, u = cam->up;
-
-    cam->forward.x = f.x * c + u.x * s;
-    cam->forward.y = f.y * c + u.y * s;
-    cam->forward.z = f.z * c + u.z * s;
-    cam->forward = vec3_norm(cam->forward);
-
-    // recompute up
-    cam->up = vec3_norm(vec3_cross(cam->right, cam->forward));
-}
-
 void setup(void) {
-  cam.position = vec3_set(0, 0, 3);
-  cam.forward  = vec3_set(0, 0, -1);
-  cam.right    = vec3_set(1, 0, 0);
+  cam.position = vec3_set(0, 0, 0);
   cam.up       = vec3_set(0, 1, 0);
 
   geometry = load_wavefront("models/keytruck.obj");
 
   model = mat4x4_identity();
   view = mat4x4_identity();
-  perspective = mat4x4_perspective(100, 0.01, 90, 4/3);
+  perspective = mat4x4_perspective(100, 0.001, 70, 4/3);
 }
 
 void camera_update(void) {
-    double moveSpeed = 0.01f;
-    double sensitivity = 0.001f;
+  double speed = 0.1;
+  double sens = 0.01;
 
-    cam.position.x += -(IsKeyDown(KEY_D) - IsKeyDown(KEY_A)) * moveSpeed;
-    cam.position.y += (IsKeyDown(KEY_W) - IsKeyDown(KEY_S)) * moveSpeed;
-    cam.position.z += -(IsKeyDown(KEY_SPACE) - IsKeyDown(KEY_LEFT_SHIFT)) * moveSpeed;  
+  cam.position.x += -(IsKeyDown(KEY_D) - IsKeyDown(KEY_A)) * speed;
+  cam.position.z += (IsKeyDown(KEY_W) - IsKeyDown(KEY_S)) * speed;
+  cam.position.y += -(IsKeyDown(KEY_SPACE) - IsKeyDown(KEY_LEFT_SHIFT)) * speed;
 
-  view = mat4x4_lookat(
-    cam.position,
-    (vec3){ cam.position.x + cam.forward.x,
-            cam.position.y + cam.forward.y,
-            cam.position.z + cam.forward.z },
-    cam.up
-  );
+  Vector2 delta = GetMouseDelta();
+  cam.yaw   -= delta.x * sens;
+  cam.pitch += delta.y * sens;
+  SetMousePosition(GetScreenWidth()/2, GetScreenHeight()/2);
+
+  if (cam.pitch > 89.0f) cam.pitch = 89.0f;
+  if (cam.pitch < -89.0f) cam.pitch = -89.0f;
+
+  mat4x4 roty = mat4x4_rotate_y(cam.yaw);
+  mat4x4 rotx = mat4x4_rotate_x(cam.pitch);
+  mat4x4 rot = mat4x4_mul(rotx, roty);
+
+  mat4x4 pos = mat4x4_translate(cam.position);
+
+  view = mat4x4_mul(mat4x4_identity(), pos);
+  view = mat4x4_mul(view, rot);
 }
 
 void update(void) {
   camera_update();
 
-  // mat4x4 translate = mat4x4_translate(vec3_set(sinf(GetTime()), cosf(GetTime()), 0));
-  // mat4x4 rotate = mat4x4_rotate_z(GetTime());
+  // mat4x4 translate = mat4x4_translate(vec3_set(0, 0, 0));
+  // mat4x4 rotate = mat4x4_rotate_y(GetTime());
   // mat4x4 scale = mat4x4_scale(vec3_set(1, 1, 1));
 
   // model = mat4x4_mul(translate, scale);
