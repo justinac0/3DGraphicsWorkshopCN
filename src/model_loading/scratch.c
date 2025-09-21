@@ -31,7 +31,7 @@ void setup(void) {
   cam.position = vec3_set(0, 0, 0);
   cam.up       = vec3_set(0, 1, 0);
 
-  geometry = load_wavefront("models/keytruck.obj");
+  geometry = load_wavefront("models/text.obj");
 
   model = mat4x4_identity();
   view = mat4x4_identity();
