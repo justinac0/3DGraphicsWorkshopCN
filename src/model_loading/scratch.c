@@ -31,11 +31,11 @@ void setup(void) {
   cam.position = vec3_set(0, 0, 0);
   cam.up       = vec3_set(0, 1, 0);
 
-  geometry = load_wavefront("models/house.obj");
+  geometry = load_wavefront("models/keytruck.obj");
 
   model = mat4x4_identity();
   view = mat4x4_identity();
-  perspective = mat4x4_perspective(100, 0.001, 70, 4/3);
+  perspective = mat4x4_perspective(100, 0.001, 70, 1);
 }
 
 static double wheel = 1;

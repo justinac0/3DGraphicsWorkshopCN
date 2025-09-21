@@ -1,6 +1,7 @@
 #ifndef MATH_H
 #define MATH_H 1
 
+#include <stdbool.h>
 #include <math.h>
 
 #define UNIT (150)

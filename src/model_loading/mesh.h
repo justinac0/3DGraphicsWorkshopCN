@@ -71,7 +71,7 @@ void mesh_add_line(mesh *m, vec2i v) {
   m->lines_len++;
 }
 
-void mesh_draw(mesh *m, mat4x4 *mp) {
+void mesh_draw(mesh *m, mat4x4 *mvp) {
   for (int i = 0; i < m->lines_len; i++) {
     int k0 = m->lines[i].x;
     int k1 = m->lines[i].y;
@@ -81,8 +81,8 @@ void mesh_draw(mesh *m, mat4x4 *mp) {
 
     viewport vp = { .x = 0, .y = 0, .width = GetScreenWidth(), .height = GetScreenHeight() };
 
-    vec4 clip0 = mat4x4_mul_vec4(*mp, hv0);
-    vec4 clip1 = mat4x4_mul_vec4(*mp, hv1);
+    vec4 clip0 = mat4x4_mul_vec4(*mvp, hv0);
+    vec4 clip1 = mat4x4_mul_vec4(*mvp, hv1);
 
     if (!clip_line(&clip0, &clip1)) continue;
 

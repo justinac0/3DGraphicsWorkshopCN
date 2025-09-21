@@ -1,57 +1,79 @@
 #include "scratch.h"
 
-#include <stdio.h>
+#include <stddef.h>
 #include <raylib.h>
-#include <math.h>
+#include "math.h"
 
-#define UNIT (250)
+static vec2 verts[4] = {
+    {-1,  1},
+    { 1,  1},
+    { 1, -1},
+    {-1, -1},
+};
 
-typedef struct vec2 {
-    double x, y;
-} vec2;
+static int indices[8] = {
+    0, 1,
+    1, 2,
+    2, 3,
+    3, 0
+};
 
-vec2 vec2_add(vec2 a, vec2 b) {
-    return (vec2){
-        .x = a.x + b.x,
-        .y = a.y + b.y,
+typedef struct vec3 {
+  double x, y, z;
+} vec3;
+
+typedef union mat3x3 {
+  vec3 v[3];
+  double mn[3][3];
+  struct {
+    double m00, m01, m02;
+    double m10, m11, m12;
+    double m20, m21, m22;
+  };
+} mat3x3;
+
+vec2 mat3x3_mul_vec2(mat3x3 m, vec2 v) {
+    vec2 result;
+    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02);
+    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12);
+
+    return result;
+}
+
+mat3x3 mat3x3_identity(void) {
+    return (mat3x3){
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
     };
 }
 
-vec2 vec2_scalar(vec2 a, double s) {
-    return (vec2){
-        .x = a.x * s,
-        .y = a.y * s,
-    };
+void draw_primitives(mat3x3 *m, vec2 *verts, size_t vert_count, int *indices, size_t ind_count) {
+    for (int i = 0; i < ind_count; i+=2) {
+        int k0 = indices[i];
+        int k1 = indices[i+1];
+
+        vec2 first = mat3x3_mul_vec2(*m, verts[k0]);
+        vec2 next = mat3x3_mul_vec2(*m, verts[k1]);
+
+        first = screen_to_world_space(first);
+        next =  screen_to_world_space(next);
+
+        DrawLine(first.x, first.y, next.x, next.y, RED);        
+    }
 }
 
-vec2 screen_to_world_space(vec2 position) {
-    vec2 screenOffset = (vec2){
-        .x = (double)(GetScreenWidth()/2.0),
-        .y = (double)(GetScreenHeight()/2.0),
-    };
-
-    return vec2_add(vec2_scalar(position, UNIT), screenOffset);
-}
-
-void vec2_set(vec2 *v, double x, double y) {
-    if (!v) return;
-
-    v->x = x;
-    v->y = y;
-}
-
-static vec2 position;
-static vec2 world;
+mat3x3 model;
 
 void setup(void) {
-    position = (vec2){0};
+    model = mat3x3_identity();
 }
 
 void update(void) {
-    world = screen_to_world_space(position);
-    vec2_set(&position, sinf(GetTime()), cosf(GetTime()));
+    model.m02 = sinf(GetTime());
+    model.m12 = cosf(GetTime());
 }
 
 void draw(void) {
-    DrawCircle(world.x, world.y, 25, RED);
+    draw_primitives(&model, verts, 4, indices, 8);
 }
