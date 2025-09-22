@@ -45,27 +45,6 @@ vec3 vec3_scalar(vec3 a, double s) {
   };
 }
 
-double vec3_dot(vec3 a, vec3 b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-double vec3_mag(vec3 a) {
-  return sqrtf(a.x*a.x + a.y*a.y + a.z*a.z);
-}
-
-vec3 vec3_norm(vec3 a) {
-    double mag = vec3_mag(a);
-    return (mag > 1e-8) ? (vec3){a.x/mag, a.y/mag, a.z/mag} : a;
-}
-
-vec3 vec3_cross(vec3 a, vec3 b) {
-  return (vec3){
-      .x = a.y * b.z - a.z * b.y,
-      .y = a.z * b.x - a.x * b.z,
-      .z = a.y * b.y - a.y * b.x,
-  };
-}
-
 vec3 screen_to_world_space(vec3 position) {
   vec3 worldPos = (vec3){
       .x = (position.x * (GetScreenWidth()/2)) + (GetScreenWidth()/2),
@@ -89,15 +68,6 @@ typedef union mat4x4 {
     double m30, m31, m32, m33;
   };
 } mat4x4;
-
-mat4x4 mat4x4_fill(double v) {
-    return (mat4x4){
-        v, v, v, v,
-        v, v, v, v,
-        v, v, v, v,
-        v, v, v, v,
-    };
-}
 
 mat4x4 mat4x4_identity(void) {
     return (mat4x4){
@@ -162,12 +132,6 @@ vec4 mat4x4_mul_vec4(mat4x4 m, vec4 v) {
     result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + (m.m13 * v.w);
     result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + (m.m23 * v.w);
     result.w = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + (m.m33 * v.w);
-
-    if (result.w != 0) {
-        result.x /= result.w;
-        result.y /= result.w;
-        result.z /= result.w;
-    }
 
     return result;
 }

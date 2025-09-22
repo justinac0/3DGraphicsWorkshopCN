@@ -16,30 +16,23 @@ void draw_shape(mat4x4 mp, vec3 *verts, size_t vert_count, int *indices, size_t 
         vec4 first = mat4x4_mul_vec4(mp, vk0);
         vec4 next = mat4x4_mul_vec4(mp, vk1);
 
+        if (first.w != 0) {
+          first.x /= first.w;
+          first.y /= first.w;
+          first.z /= first.w;
+        }
+
+        if (next.w != 0) {
+          next.x /= next.w;
+          next.y /= next.w;
+          next.z /= next.w;
+        }
+
         vec3 f = screen_to_world_space((vec3){first.x, first.y, first.z});
         vec3 n =  screen_to_world_space((vec3){next.x, next.y, next.z});
 
         DrawLine(f.x, f.y, n.x, n.y, GREEN);
     }
-}
-
-// NOT COVERED IN WORKSHOP - uses code that defines clip space and viewport
-void draw_draw(mat4x4 mp, vec3 *verts, size_t vert_count, int *indices, size_t ind_count) {
-  for (int i = 0; i < ind_count; i+=2) {
-    int k0 = indices[i];
-    int k1 = indices[i+1];
-
-    vec4 hv0 = { verts[k0].x, verts[k0].y, verts[k0].z, 1.0 };
-    vec4 hv1 = { verts[k1].x, verts[k1].y, verts[k1].z, 1.0 };
-
-    vec4 first = mat4x4_mul_vec4(mp, hv0);
-    vec4 next  = mat4x4_mul_vec4(mp, hv1);
-
-    vec3 f = screen_to_world_space((vec3){first.x, first.y, first.z});
-    vec3 n =  screen_to_world_space((vec3){next.x, next.y, next.z});
-
-    DrawLine(f.x, f.y, n.x, n.y, GREEN);
-  }
 }
 
 #endif // DRAW_H
