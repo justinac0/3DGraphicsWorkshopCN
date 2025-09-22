@@ -41,8 +41,10 @@ void setup(void) {
 }
 
 void update(void) {
-    model = mat4x4_translate((vec3){sinf(GetTime()), 0, -15});
-    // model = mat4x4_mul(translate, mat4x4_rotate_x(GetTime()));
+    mat4x4 translate = mat4x4_translate((vec3){sinf(GetTime()), 0, -15});
+    model = mat4x4_mul(translate, mat4x4_rotate_z(GetTime()));
+    model = mat4x4_mul(model, mat4x4_rotate_x(GetTime()));
+
     MP = mat4x4_mul(perspective, model);
 }
 
