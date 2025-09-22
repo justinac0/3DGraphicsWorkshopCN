@@ -198,16 +198,17 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     return m;
 }
 
-mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) {
+mat4x4 mat4x4_perspective(double zfar, double znear, double fovdeg, double aspect) {
+    fovdeg *= (PI/180);
     mat4x4 m = mat4x4_identity();
-    double f = 1/tanf(fov * 0.5);
+    double f = 1/tanf(fovdeg * 0.5);
 
     m.m00 = f/aspect;
     m.m11 = f;
 
     m.m22 = -(zfar + znear) / (znear - zfar);
     m.m23 = -(2.0 * zfar * znear) / (znear - zfar);
-    m.m32 = 1.0;
+    m.m32 = -1.0;
 
     return m;
 }

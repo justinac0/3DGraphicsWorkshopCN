@@ -36,14 +36,14 @@ mat4x4 perspective;
 mat4x4 MP;
 
 void setup(void) {
-    model = mat4x4_identity();
-    perspective = mat4x4_perspective(100, 0.001, 70, 1);
+    perspective = mat4x4_perspective(100, 0.001, 90, 1);
 }
 
 void update(void) {
-    mat4x4 translate = mat4x4_translate((vec3){sinf(GetTime()), 0, -15});
-    model = mat4x4_mul(translate, mat4x4_rotate_z(GetTime()));
+    model = mat4x4_translate((vec3){sinf(GetTime()), 0, -5});
     model = mat4x4_mul(model, mat4x4_rotate_x(GetTime()));
+    model = mat4x4_mul(model, mat4x4_rotate_z(GetTime()));
+    model = mat4x4_mul(model, mat4x4_scale((vec3){1, 1, 1}));
 
     MP = mat4x4_mul(perspective, model);
 }

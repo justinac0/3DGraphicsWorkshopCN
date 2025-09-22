@@ -32,7 +32,6 @@ void draw_draw(mat4x4 mp, vec3 *verts, size_t vert_count, int *indices, size_t i
     vec4 hv0 = { verts[k0].x, verts[k0].y, verts[k0].z, 1.0 };
     vec4 hv1 = { verts[k1].x, verts[k1].y, verts[k1].z, 1.0 };
 
-
     vec4 first = mat4x4_mul_vec4(mp, hv0);
     vec4 next  = mat4x4_mul_vec4(mp, hv1);
 
