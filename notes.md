@@ -134,19 +134,44 @@
 - Matrix operations are the same, we just add one more row and column (w).
 
 ## Vectors cont. [Slide 23]
--  
+- 3D vectors have the same operations as 2D ones - there are more but I won't go into that in this talk. You can ask me later about these operations.
+- Just like the 2D case where we needed +1 component to our vectors and matrices we need a 4x4 matrix and 4D vectors to do opetaions on 3D vectors with matrices.
+- When I say 4D vectors, I mean 4 components, the forth component here has nothing to do with space-time.
+- What use does the fourth component have? Great question. I will talk about that soon.
 
 ## Matrices cont. [Slide 24]
+- Before we looked at matrix-vector operations where we could make transformations to our geometry by multiplying some matrix against them.
+- We will need the same thing in our 3D case; however, we also need a way to multiply matrices against each other.
 
-## Live Code Example 3 [Slide 25]
+[Whiteboard]
 
-## Matrices cont. [Slide 26]
+- Matrix multiplication
+- Matrix vector multiplication
+
+## Matrices cont. [Slide 25]
+- Matrix-matrix multiplication is required because we need to multiply our model matrix against a special kind of matrix called the perspective projection matrix.
+- This is the magic behind most 3D graphics.
+- What is the perspective projection matrix: imagine this, you're standing in front of a window, looking out at the world. The glass acts like a projection surface. Objects that are close to you look big on the glass, and objects far away look small. That is perspective.
+- This is the math trick that the perspective projection matrix pulls off. I takes 3D points from the world (x, y, z coords) and squashes them down into a 2D screen space so they look like how our eyes see them.
+
+## Matrices (Perspective Projection) [Slide 26]
+- Objects in the distance will appear smaller when using a perspective projection matrix.
+- if times permitting talk about each component.
+1. FOV: this is your viewing angle. How much you can see the the left and right as an angle.
+2. Aspect: This will strech or squash the image so it can fit your screen shape.
+3. Near and far plance: decides what's the closest thing you'll draw and what's the furthest thing we can draw.
+4. *The Magic Divide: this is the w component. Right when we draw after out matrices have been multiplied each component to the drawn geometry will be divided by this w value. This division gives us the perception of depth.
 
 ## Matrices (Perspective Projection) [Slide 27]
+- This may look super scary but don't worry, what I have just explained is exatly how it works. Now lets get some 3D going.
 
-## Matrices (Perspective Projection) [Slide 28]
+## Live Code Example 3 [Slide 28]
+[Code]
+
+- The perspective projection matrix is a tool we use that takes 3D coordinates and turns them into 2D screen positions, while making far things look smaller and near things big.
 
 ## Live Code Example 4 [Slide 29]
+[Code]
 
 ## Bonus Content [Slide 30]
 - Showcase model loading
