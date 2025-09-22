@@ -2,39 +2,38 @@
 - Welcome
 - Who has done graphics programming before, visualisations etc...
 
-## Why? [Slide 2]
+# Why? [Slide 2]
 - Graphics programming is an incredibly rewarding area in computer science.
 - Deepen your understanding of mathematics, physics, algorithms, computer hardware, optimisations, visual art, game development, tooling, and more.
 - You can learn hard things, you just have to start small!
 
-## What Are We Doing Today? [Slide 3]
-- We will learn from the ground up how can we draw basic shapes and move them (1D), how we can move from screen space (pixel based space) to some world space (scaled space that is easier for us to work with).
-- Learn about foundational mathematics used throughout 3D grpahics, vectors and matricies. Learn about transformations and learn how to draw more complex shapes (2D).
-- And finally we will learn a few more concepts with matricies to make 3D possible.
-
-## Black Box [Slide 4]
+# Black Box [Slide 3]
 - In software, a black box is a metaphorical representation of some component or system.
 - We pass in some input, the black box does its thing and produces some output. 
 - To truely understand a black box we need to dig deep into the system.
 
-## Black Box [Slide 5]
+## Black Box [Slide 4]
 - The high-level black box in 3D graphics looks something like this.
 - Our input is data representing shapes, the transformations applied to the shapes (like rotations, scale, position, etc...).
 - This input passes through some black box.
 - Resulting in our output, pixels being rendered to a canvas in a way the we expect.
 
-## From Black Box -> White Box [Slide 6]
+## From Black Box -> White Box [Slide 5]
 - Understanding how systems work requires us to dig deep, figure out the steps/implementation required to have a clear view of what actually happens inside the black box.
 - My goal for this workshop is to demistify the black box of 3D graphics.
 - But first lets think about the problem we are trying to solve.
 
-
-## The Problem [Slide 7]
+# The Problem [Slide 6]
 - Screens are 2D -> flat
 - We want 3D -> objects have depth
 - The Challenge (The Black Box) -> how is the perception of depth (3D) achieved on a 2D screens.
 
-## Don't be afraid of the C [Slide 8]
+# What Are We Doing Today? [Slide 7]
+- We will learn from the ground up how can we draw basic shapes and move them (1D), how we can move from screen space (pixel based space) to some world space (scaled space that is easier for us to work with).
+- Learn about foundational mathematics used throughout 3D grpahics, vectors and matricies. Learn about transformations and learn how to draw more complex shapes (2D).
+- And finally we will learn a few more concepts with matricies to make 3D possible.
+
+# Don't be afraid of the C [Slide 8]
 - You may have heard of the C programming language before; some may hate it because of CAB202; however, it's actually quite a simple language, also it's super portable and has been battle tested for over 50 years!
 - You don't need a deep understanding of C to read the code shown during this workshop.
 - If you have experience with any other language you should be able to follow.
@@ -105,14 +104,28 @@
 - magnitude,
 - *normalize
 
-## Matrices [Slide 18]
+## Matrices? [Slide 18]
 - Similar to how vectors are a tool for representing multiple quantities at once.
 - Matrices are used to represent multiple vectors at once.
 - Matrices are the excel spread sheet of math. Lets get a feel for them!
 
+## Matrices [Slide 19]
+- Rows and columns
+
+## Transformations [Slide 20]
+- The three types of transformations we will learn about today
+- Translations, Scaling and Rotation.
+- The identity matrix is analogous to multiplying a vector by 1. Nothing changes.
+- We need to increase our dimensions to actually change the vector how we want.
+- Translation.
+
 [Whiteboard]
 
+## Live Code Example 2 [Slide 21]
 [Code Example 3]
+- Translation
+- Scaling
+- Rotation (Skewing)
 
 # Topic 3: 3D [Slide 22]
 - It is now time for the final boss battle.
@@ -120,5 +133,24 @@
 - Vector operations are the same, we just add one more component to our vectors (z).
 - Matrix operations are the same, we just add one more row and column (w).
 
-## Vectors cont.
-- 
+## Vectors cont. [Slide 23]
+-  
+
+## Matrices cont. [Slide 24]
+
+## Live Code Example 3 [Slide 25]
+
+## Matrices cont. [Slide 26]
+
+## Matrices (Perspective Projection) [Slide 27]
+
+## Matrices (Perspective Projection) [Slide 28]
+
+## Live Code Example 4 [Slide 29]
+
+## Bonus Content [Slide 30]
+- Showcase model loading
+- Don't need to go into too much detail
+
+## Questions [Slide 31]
+

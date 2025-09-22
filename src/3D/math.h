@@ -15,18 +15,6 @@ typedef struct vec3 {
   double x, y, z;
 } vec3;
 
-vec3 vec3_up(void) {
-    return (vec3){0,1,0};
-}
-
-vec3 vec3_right(void) {
-    return (vec3){1,0,0};
-}
-
-vec3 vec3_forward(void) {
-    return (vec3){0,0,1};
-}
-
 vec3 vec3_set(double x, double y, double z) {
     return (vec3){
         x, y, z
@@ -79,12 +67,12 @@ vec3 vec3_cross(vec3 a, vec3 b) {
 }
 
 vec3 screen_to_world_space(vec3 position) {
-  vec3 screenOffset = (vec3){
-      .x = (double)(GetScreenWidth() / 2.0),
-      .y = (double)(GetScreenHeight() / 2.0),
+  vec3 worldPos = (vec3){
+      .x = (position.x * (GetScreenWidth()/2)) + (GetScreenWidth()/2),
+      .y = (position.y * (GetScreenHeight()/2)) + (GetScreenHeight()/2),
   };
 
-  return vec3_add(vec3_scalar(position, UNIT), screenOffset);
+  return worldPos;
 }
 
 typedef struct vec4 {
