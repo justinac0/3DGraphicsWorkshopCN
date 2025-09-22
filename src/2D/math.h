@@ -44,10 +44,11 @@ typedef union mat3x3 {
   };
 } mat3x3;
 
-vec2 mat3x3_mul_vec2(mat3x3 m, vec2 v) {
-    vec2 result;
-    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02);
-    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12);
+vec3 mat3x3_mul_vec3(mat3x3 m, vec3 v) {
+    vec3 result;
+    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z);
+    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z);
+    result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z);
 
     return result;
 }
