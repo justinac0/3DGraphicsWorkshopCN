@@ -70,8 +70,7 @@ void setup(void) {
 }
 
 void update(void) {
-    model.m02 = sinf(GetTime());
-    model.m12 = cosf(GetTime());
+
 }
 
 void draw(void) {
