@@ -47,4 +47,78 @@
 - I will now demonstrate the setup required to run the code used in this workshop.
 
 # Topic 1: 1D [Slide 10]
+- Lets get a feel for raylib and understand how we can draw basic things on screen.
+- I'm going to open up the `main.c` inside the `src/raylib_example` directory.
+
+## Open a window and draw a circle
+- What is a window, frames, drawing a circle, moving circle, clearing the background after each frame.
+
+[Code]
+
+## Centering our circle -> Screen space to World space
+- Moving to the boiler plate code found in `src/1D`.
+- Most raylib behaviour is abstracted away - for all subsequent code demos I will be using a similar base.
+- `setup()` is called before our main loop - all initialization code goes here, `update()` is called per some amount of time - code that changes the state of what is drawn is placed here, and `draw()` where all of the drawing code will go.
+- You may have noticed that when we draw our circle it appears in the top left hand corner of our window.
+- This is because our positions at the moment are defined in something called screen space. Where the x and y positions directly relate to pixel positions.
+- This is not ideal, therefore, we have to figure out a way to center our drawing (this graphics programming equivilent of centering a div).
+
+[Whiteboard explain screen space and world space]
+
+[Code]
+
+- Now like before we can move our circle around and more easily see where it's going.
+
+# What is Space [Slide 11-12]
+- Help us define where things exist.
+- Here are 3 examples of different types of spaces, 1D space - basically a numberline where x=0 is the center and we can tell how far something is from the origin just by increasing x or decreasing it.
+- 2D space - now we can define where something is just by adding an extra variable y. (x, y).
+- 3D space - one more variable z.
+- Once we go past the 1D case we can use different math tools I touch on later that makes working in higher dimensions easier.
+
+# Geometric Primitives (Shapes) [Slide 13]
+- Geometric Primitives are what we draw.
+
+[Use whiteboard for following example]
+
+- Drawing a square, define points, connect the dots.
+
+# Topic 2: 2D [Slide 14]
+- Now lets turn up the heat a little bit and jump in to some math.
+- If you have done any first year math classes at university you should be in a pretty good spot to understand what is happening. If not, don't fear, I will try explain things simply.
+
+## Vectors [Slide 15-17]
+- What we have dealt with so far is single valued variables; x
+- Vectors are a helpful tool in mathematics to help us define quantities that can't be described by a single value.
+- Some examples are: Displacement (aka position),
+- velocity,
+- acceleration,
+- force,
+- colors,
+- etc...
+- Much like single valued variables (also known as scalars) we can operate on vectors.
+
+[Whiteboard some examples]
+
+- addition,
+- subtraction,
+- magnitude,
+- *normalize
+
+## Matrices [Slide 18]
+- Similar to how vectors are a tool for representing multiple quantities at once.
+- Matrices are used to represent multiple vectors at once.
+- Matrices are the excel spread sheet of math. Lets get a feel for them!
+
+[Whiteboard]
+
+[Code Example 3]
+
+# Topic 3: 3D [Slide 22]
+- It is now time for the final boss battle.
+- The good news is that what we have covered so far is directly transferable to what we do in 3D.
+- Vector operations are the same, we just add one more component to our vectors (z).
+- Matrix operations are the same, we just add one more row and column (w).
+
+## Vectors cont.
 - 

@@ -1,17 +1,14 @@
 #include "scratch.h"
 
+#include <math.h>
 #include <raylib.h>
 
-#include <math.h>
+#define WORLD_UNIT (100)
+#define SCREEN_WIDTH (640)
+#define SCREEN_HEIGHT (480)
 
-#define UNIT (100)
-
-double unit_scale(double x) {
-    return x * UNIT;
-}
-
-double screen_to_world_space(double position) {
-    return unit_scale(position) + (GetScreenWidth()/2.0);
+double screen_x_to_world(double x, double unit) {
+    return (x * unit) + GetScreenWidth()/2;
 }
 
 static double x;
@@ -25,6 +22,6 @@ void update(void) {
 }
 
 void draw(void) {
-    double world_x = screen_to_world_space(x);
-    DrawCircle(world_x, GetScreenHeight()/2, 25, RED);
+    double world_x = screen_x_to_world(x, GetScreenWidth()/2);
+    DrawCircle(world_x, GetScreenHeight()/2, 25, GREEN);
 }

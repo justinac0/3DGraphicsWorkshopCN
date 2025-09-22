@@ -93,7 +93,7 @@ typedef struct vec4 {
 
 typedef union mat4x4 {
   vec4 v[4];
-  double mn[4][4];
+  double rc[4][4];
   struct {
     double m00, m01, m02, m03;
     double m10, m11, m12, m13;
@@ -182,9 +182,9 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     mat4x4 m;
     for (int row = 0; row < 4; row++) {
         for (int col = 0; col < 4; col++) {
-            m.mn[row][col] = 0;
+            m.rc[row][col] = 0;
             for (int k = 0; k < 4; k++) {
-                m.mn[row][col] += a.mn[row][k] * b.mn[k][col];
+                m.rc[row][col] += a.rc[row][k] * b.rc[k][col];
             }
         }
     }
@@ -202,20 +202,6 @@ mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) 
     m.m22 = -(zfar + znear) / (zfar - znear);
     m.m32 = -1;
     m.m23 = -((2.0 * zfar * znear) / (zfar - znear));
-
-    return m;
-}
-
-mat4x4 mat4x4_lookat(vec3 eye, vec3 target, vec3 worldUp) {
-    vec3 f = vec3_norm(vec3_sub(target, eye));
-    vec3 r = vec3_norm(vec3_cross(f, worldUp));
-    vec3 u = vec3_cross(r, f);
-
-    mat4x4 m;
-    m.m00 =  r.x;  m.m01 =  r.y;  m.m02 =  r.z;  m.m03 = -vec3_dot(r, eye);
-    m.m10 =  u.x;  m.m11 =  u.y;  m.m12 =  u.z;  m.m13 = -vec3_dot(u, eye);
-    m.m20 = -f.x;  m.m21 = -f.y;  m.m22 = -f.z;  m.m23 =  vec3_dot(f, eye);
-    m.m30 =  0.0;  m.m31 =  0.0;  m.m32 =  0.0;  m.m33 =  1.0;
 
     return m;
 }
@@ -274,8 +260,8 @@ typedef struct {
 vec3 ndc_to_screen(vec3 ndc, viewport vp) {
     vec3 out;
     out.x = vp.x + (ndc.x + 1.0) * 0.5 * vp.width;
-    out.y = vp.y + (1.0 - (ndc.y + 1.0) * 0.5) * vp.height; // flip Y
-    out.z = ndc.z; // depth stays in [-1,1] or [0,1] depending on convention
+    out.y = vp.y + (1.0 - (ndc.y + 1.0) * 0.5) * vp.height;
+    out.z = ndc.z;
     return out;
 }
 

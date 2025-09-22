@@ -3,8 +3,6 @@
 
 #include <math.h>
 
-#define UNIT (100)
-
 typedef struct vec2 {
     double x, y;
 } vec2;
@@ -24,12 +22,42 @@ vec2 vec2_scalar(vec2 a, double s) {
 }
 
 vec2 screen_to_world_space(vec2 position) {
-    vec2 screenOffset = (vec2){
-        .x = (double)(GetScreenWidth()/2.0),
-        .y = (double)(GetScreenHeight()/2.0),
+    vec2 worldPos = (vec2){
+        .x = (position.x * GetScreenWidth()/2) + (GetScreenWidth()/2),
+        .y = (position.y * GetScreenHeight()/2) + (GetScreenHeight()/2),
     };
 
-    return vec2_add(vec2_scalar(position, UNIT), screenOffset);
+    return worldPos;
+}
+
+typedef struct vec3 {
+  double x, y, z;
+} vec3;
+
+typedef union mat3x3 {
+  vec3 v[3];
+  double mn[3][3];
+  struct {
+    double m00, m01, m02;
+    double m10, m11, m12;
+    double m20, m21, m22;
+  };
+} mat3x3;
+
+vec2 mat3x3_mul_vec2(mat3x3 m, vec2 v) {
+    vec2 result;
+    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02);
+    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12);
+
+    return result;
+}
+
+mat3x3 mat3x3_identity(void) {
+    return (mat3x3){
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    };
 }
 
 #endif // MATH_H

@@ -11,7 +11,7 @@
 
 #include "math.h"
 
-#define DEFAULT_VERT_CAP (1000000)
+#define DEFAULT_VERT_CAP (10000)
 
 typedef struct mesh {
   size_t lines_len;
@@ -71,7 +71,7 @@ void mesh_add_line(mesh *m, vec2i v) {
   m->lines_len++;
 }
 
-void mesh_draw(mesh *m, mat4x4 *mvp) {
+void mesh_draw(mesh *m, mat4x4 mvp) {
   for (int i = 0; i < m->lines_len; i++) {
     int k0 = m->lines[i].x;
     int k1 = m->lines[i].y;
@@ -81,8 +81,8 @@ void mesh_draw(mesh *m, mat4x4 *mvp) {
 
     viewport vp = { .x = 0, .y = 0, .width = GetScreenWidth(), .height = GetScreenHeight() };
 
-    vec4 clip0 = mat4x4_mul_vec4(*mvp, hv0);
-    vec4 clip1 = mat4x4_mul_vec4(*mvp, hv1);
+    vec4 clip0 = mat4x4_mul_vec4(mvp, hv0);
+    vec4 clip1 = mat4x4_mul_vec4(mvp, hv1);
 
     if (!clip_line(&clip0, &clip1)) continue;
 
@@ -92,7 +92,7 @@ void mesh_draw(mesh *m, mat4x4 *mvp) {
     vec3 first = ndc_to_screen((vec3){clip0.x, clip0.y, clip0.z}, vp);
     vec3 next  = ndc_to_screen((vec3){clip1.x, clip1.y, clip1.z}, vp);
 
-    DrawLine(first.x, first.y, next.x, next.y, RED);
+    DrawLine(first.x, first.y, next.x, next.y, GREEN);
   }
 }
 

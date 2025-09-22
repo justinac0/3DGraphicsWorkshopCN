@@ -1,6 +1,5 @@
 #ifndef MATH_H
-#define MATH_H
-
+#define MATH_H 1
 
 #include <stdbool.h>
 #include <math.h>
@@ -15,6 +14,18 @@ typedef struct vec2i {
 typedef struct vec3 {
   double x, y, z;
 } vec3;
+
+vec3 vec3_up(void) {
+    return (vec3){0,1,0};
+}
+
+vec3 vec3_right(void) {
+    return (vec3){1,0,0};
+}
+
+vec3 vec3_forward(void) {
+    return (vec3){0,0,1};
+}
 
 vec3 vec3_set(double x, double y, double z) {
     return (vec3){
@@ -82,7 +93,7 @@ typedef struct vec4 {
 
 typedef union mat4x4 {
   vec4 v[4];
-  double mn[4][4];
+  double rc[4][4];
   struct {
     double m00, m01, m02, m03;
     double m10, m11, m12, m13;
@@ -118,30 +129,51 @@ mat4x4 mat4x4_translate(vec3 pos) {
     return m;
 }
 
-
-mat4x4 mat4x4_rotate(double theta) {
-    mat4x4 m = (mat4x4){
-        cosf(theta), -sinf(theta), 0, 0,
-        sinf(theta), cosf(theta), 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    };
+mat4x4 mat4x4_scale(vec3 scale) {
+    mat4x4 m = mat4x4_identity();
+    m.m00 = scale.x;
+    m.m11 = scale.y;
+    m.m22 = scale.z;
 
     return m;
 }
 
-vec3 mat4x4_mul_vec3(mat4x4 m, vec3 v) {
-    vec3 result;
-    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z) + (m.m03);
-    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + (m.m13);
-    result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + (m.m23);
-    double w = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + (m.m33);
+mat4x4 mat4x4_rotate_x(double theta) {
+    mat4x4 m = mat4x4_identity();
+    m.m11 = cosf(theta);
+    m.m12 = -sinf(theta);
+    m.m21 = sinf(theta);
+    m.m22 = cosf(theta);
 
-    if (w != 0) {
-        result.x /= w;
-        result.y /= w;
-        result.z /= w;
-    }
+    return m;
+}
+
+mat4x4 mat4x4_rotate_y(double theta) {
+    mat4x4 m = mat4x4_identity();
+    m.m00 = cosf(theta);
+    m.m02 = sinf(theta);
+    m.m20 = -sinf(theta);
+    m.m22 = cosf(theta);
+
+    return m;
+}
+
+mat4x4 mat4x4_rotate_z(double theta) {
+    mat4x4 m = mat4x4_identity();
+    m.m00 = cosf(theta);
+    m.m01 = -sinf(theta);
+    m.m10 = sinf(theta);
+    m.m11 = cosf(theta);
+
+    return m;
+}
+
+vec4 mat4x4_mul_vec4(mat4x4 m, vec4 v) {
+    vec4 result;
+    result.x = (m.m00 * v.x) + (m.m01 * v.y) + (m.m02 * v.z) + (m.m03 * v.w);
+    result.y = (m.m10 * v.x) + (m.m11 * v.y) + (m.m12 * v.z) + (m.m13 * v.w);
+    result.z = (m.m20 * v.x) + (m.m21 * v.y) + (m.m22 * v.z) + (m.m23 * v.w);
+    result.w = (m.m30 * v.x) + (m.m31 * v.y) + (m.m32 * v.z) + (m.m33 * v.w);
 
     return result;
 }
@@ -150,9 +182,9 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     mat4x4 m;
     for (int row = 0; row < 4; row++) {
         for (int col = 0; col < 4; col++) {
-            m.mn[row][col] = 0;
+            m.rc[row][col] = 0;
             for (int k = 0; k < 4; k++) {
-                m.mn[row][col] += a.mn[row][k] * b.mn[k][col];
+                m.rc[row][col] += a.rc[row][k] * b.rc[k][col];
             }
         }
     }
@@ -160,15 +192,77 @@ mat4x4 mat4x4_mul(mat4x4 a, mat4x4 b) {
     return m;
 }
 
-mat4x4 mat4x4_perspective(void) {
-    mat4x4 m = (mat4x4){
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 1,
-        0, 0, 1, 0
-    };
+mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) {
+    mat4x4 m = mat4x4_identity();
+    double f = atanf(fov * 0.5);
+
+    m.m00 = f/aspect;
+    m.m11 = f;
+
+    m.m22 = (zfar + znear) / (znear - zfar);
+    m.m23 = (2.0 * zfar * znear) / (znear - zfar);
+    m.m32 = -1.0;
 
     return m;
+}
+
+bool inside_clip(vec4 v) {
+    return (-v.w <= v.x && v.x <= v.w) &&
+           (-v.w <= v.y && v.y <= v.w) &&
+           (-v.w <= v.z && v.z <= v.w);
+}
+
+vec4 vec4_lerp(vec4 a, vec4 b, double t) {
+    return (vec4){
+        a.x + (b.x - a.x) * t,
+        a.y + (b.y - a.y) * t,
+        a.z + (b.z - a.z) * t,
+        a.w + (b.w - a.w) * t
+    };
+}
+
+bool clip_line(vec4 *v0, vec4 *v1) {
+    for (int plane = 0; plane < 6; plane++) {
+        double a0, a1;
+
+        switch (plane) {
+            case 0: a0 =  v0->x + v0->w; a1 =  v1->x + v1->w; break;
+            case 1: a0 = -v0->x + v0->w; a1 = -v1->x + v1->w; break;
+            case 2: a0 =  v0->y + v0->w; a1 =  v1->y + v1->w; break;
+            case 3: a0 = -v0->y + v0->w; a1 = -v1->y + v1->w; break;
+            case 4: a0 =  v0->z + v0->w; a1 =  v1->z + v1->w; break;
+            case 5: a0 = -v0->z + v0->w; a1 = -v1->z + v1->w; break;
+        }
+
+        if (a0 < 0 && a1 < 0) return false;
+
+        if (a0 < 0 || a1 < 0) {
+            double t = a0 / (a0 - a1);
+            vec4 newv = vec4_lerp(*v0, *v1, t);
+            if (a0 < 0) {
+                *v0 = newv;
+            } else {
+                *v1 = newv;
+            }
+        }
+    }
+
+    return true;
+}
+
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} viewport;
+
+vec3 ndc_to_screen(vec3 ndc, viewport vp) {
+    vec3 out;
+    out.x = vp.x + (ndc.x + 1.0) * 0.5 * vp.width;
+    out.y = vp.y + (1.0 - (ndc.y + 1.0) * 0.5) * vp.height;
+    out.z = ndc.z;
+    return out;
 }
 
 #endif // MATH_H
