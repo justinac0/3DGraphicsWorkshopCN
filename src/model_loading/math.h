@@ -206,6 +206,20 @@ mat4x4 mat4x4_perspective(double zfar, double znear, double fov, double aspect) 
     return m;
 }
 
+mat4x4 mat4x4_orthographic(double zfar, double znear, double r, double l, double t, double b) {
+    mat4x4 m = mat4x4_identity();
+    m.m00 = 2/(r - l);
+    m.m03 = -((r + l)/(r - l));
+
+    m.m11 = 2/(t - b);
+    m.m13 = -((t + b)/(t - b));
+    
+    m.m22 = -2/(zfar - znear);
+    m.m23 = -((zfar + znear)/(zfar - znear));
+
+    return m;
+}
+
 bool inside_clip(vec4 v) {
     return (-v.w <= v.x && v.x <= v.w) &&
            (-v.w <= v.y && v.y <= v.w) &&
