@@ -1,8 +1,8 @@
 #include <math.h>
 #include <raylib.h>
 
-#define SCREEN_WIDTH (640)
-#define SCREEN_HEIGHT (480)
+#define SCREEN_WIDTH (1280)
+#define SCREEN_HEIGHT (720)
 
 double screen_x_to_world(double x, double unit) {
     return (x * (GetScreenWidth()/2)) + GetScreenWidth()/2;

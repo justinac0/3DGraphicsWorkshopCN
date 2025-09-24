@@ -2,7 +2,7 @@
 #include "scratch.h"
 
 int main(void) {
-    InitWindow(640, 480, "3D Graphics Workshop");
+    InitWindow(1280, 720, "3D Graphics Workshop");
 
     setup();
 
