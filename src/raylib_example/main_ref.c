@@ -18,8 +18,6 @@ int main(void) {
         ClearBackground(BLACK);
         DrawCircle(screen_x_to_world(x, GetScreenWidth()/2), GetScreenHeight()/2, 15, GREEN);
         EndDrawing();
-    
-        x = sinf(GetTime());
     }
 
     CloseWindow();

@@ -55,7 +55,7 @@ void manual_rotate_model(void) {
 }
 
 void setup(void) {
-  geometry0 = load_wavefront("models/isosphere.obj");
+  geometry0 = load_wavefront("models/keytruck.obj");
   geometry1 = load_wavefront("models/text.obj");
 
   model0 = mat4x4_identity();
