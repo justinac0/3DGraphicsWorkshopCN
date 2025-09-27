@@ -29,7 +29,7 @@ void draw_shape(mat4x4 mp, vec3 *verts, size_t vert_count, int *indices, size_t 
         }
 
         vec3 f = screen_to_world_space((vec3){first.x, first.y, first.z});
-        vec3 n =  screen_to_world_space((vec3){next.x, next.y, next.z});
+        vec3 n = screen_to_world_space((vec3){next.x, next.y, next.z});
 
         DrawLine(f.x, f.y, n.x, n.y, GREEN);
     }

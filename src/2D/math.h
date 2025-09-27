@@ -2,6 +2,7 @@
 #define MATH_H
 
 #include <math.h>
+#include <raylib.h>
 
 typedef struct vec2 {
     double x, y;
@@ -23,8 +24,8 @@ vec2 vec2_scalar(vec2 a, double s) {
 
 vec2 screen_to_world_space(vec2 position) {
     vec2 worldPos = (vec2){
-        .x = (position.x * GetScreenWidth()/2) + (GetScreenWidth()/2),
-        .y = (position.y * GetScreenHeight()/2) + (GetScreenHeight()/2),
+        .x = (position.x * GetScreenWidth()/2),
+        .y = (position.y * GetScreenHeight()/2),
     };
 
     return worldPos;

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include <raylib.h>
 
 #define UNIT (150)
 
@@ -47,8 +48,8 @@ vec3 vec3_scalar(vec3 a, double s) {
 
 vec3 screen_to_world_space(vec3 position) {
   vec3 worldPos = (vec3){
-      .x = (position.x * (GetScreenWidth()/2)) + (GetScreenWidth()/2),
-      .y = (position.y * (GetScreenHeight()/2)) + (GetScreenHeight()/2),
+      .x = (position.x * (GetScreenWidth()/2)),
+      .y = (position.y * (GetScreenHeight()/2)),
   };
 
   return worldPos;

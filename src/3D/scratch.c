@@ -1,7 +1,6 @@
 #include "scratch.h"
-
-#include <raylib.h>
 #include "math.h"
+#include "draw.h"
 
 vec3 cube[8] = {
     (vec3){ 1, -1,  1},
@@ -38,6 +37,6 @@ void update(void) {
 }
 
 void draw(void) {
-    DrawText("NOT IMPLEMENTED", 10, 10, 24, WHITE);
+    DrawText("NOT IMPLEMENTED", 0, 0, 24, WHITE);
 }
 
