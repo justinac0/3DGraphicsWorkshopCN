@@ -20,10 +20,15 @@ static int indices[8] = {
 mat3x3 model;
 
 void setup(void) {
-    model = mat3x3_identity();
+    model = (mat3x3){
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1,
+    };
 }
 
 void update(void) {
+
 }
 
 void draw(void) {

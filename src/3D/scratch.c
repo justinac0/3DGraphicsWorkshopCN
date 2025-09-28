@@ -39,4 +39,3 @@ void update(void) {
 void draw(void) {
     DrawText("NOT IMPLEMENTED", 0, 0, 24, WHITE);
 }
-
